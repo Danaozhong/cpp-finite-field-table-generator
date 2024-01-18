@@ -6,6 +6,10 @@ This CLI can be used to generate a [Galois table](http://www.ee.unb.ca/cgi-bin/t
 
 ![build-linux](https://github.com/Danaozhong/cpp-finite-field-table-generator/actions/workflows/build-linux.yaml/badge.svg)
 
+![build-macos](https://github.com/Danaozhong/cpp-finite-field-table-generator/actions/workflows/build-macos.yaml/badge.svg)
+
+![tests](https://github.com/Danaozhong/cpp-finite-field-table-generator/actions/workflows/run-tests.yaml/badge.svg)
+
 You need these tables to be able to calculate multiplications and additions of a primitive polynomial P(x).
 
 To be honest, by today I don't even know what a galois table was exactly used for, but I remember that back then the output of this tool helped me pass the university exam in Coding Theory.

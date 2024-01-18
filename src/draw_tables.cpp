@@ -22,7 +22,11 @@ void DrawOperationTable(std::bitset<1024> primitivePoly, std::ostream &os,
       os << " + ";
     }
     started = true;
-    os << "x^" << i;
+    if (i == 0) {
+      os << "x^" << i;
+    } else {
+      os << "1";
+    }
   }
 
   os << std::endl << std::endl;

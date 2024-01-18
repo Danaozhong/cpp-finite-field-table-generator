@@ -3,7 +3,7 @@
 
 namespace Galois {
 int get_polynomial_degree(const std::bitset<1024> &primitivePoly) {
-  if (0 == primitivePoly.to_ulong()) {
+  if (primitivePoly.none()) {
     return 0;
   }
 
@@ -17,39 +17,29 @@ int get_polynomial_degree(const std::bitset<1024> &primitivePoly) {
   return GF_m - 1;
 }
 
-/// @brief Evaluates a primitive polynomial.
-/// @param primitivePoly The polynomial coefficients.
-/// @param x The vector representation of the coefficients, e.g. 3 = 0x11b =
-/// alpha + 1.
-/// @return The simplified vector coefficients.
-std::bitset<1024> simplify_coefficients(std::bitset<1024> primitivePoly,
-                                        std::bitset<1024> vector_coefficients) {
-  int GF_m = get_polynomial_degree(primitivePoly);
-  std::bitset<1024> primPolyValue(primitivePoly);
-
-  if (vector_coefficients.none()) {
-    return vector_coefficients;
+std::bitset<1024>
+simplify_coefficients(const std::bitset<1024> &poly_coefficients,
+                      std::bitset<1024> primitive_ele_coeff) {
+  int GF_m = get_polynomial_degree(poly_coefficients);
+  if (primitive_ele_coeff.none()) {
+    return primitive_ele_coeff;
   }
 
   /*
   Handle vector coefficients higher than the polynomial length.
-  For example, for a polynomial p(x) = x^4 + x + 1, a coefficient at index 4 (or
-  higher) can be simplified. An exponent of 4 = 1000b (component binary) should
-  be simplified to (0011b). This is because for a^4: a^4^4 + a^4 + 1 = 0
-  (because a^4 is a root of p(x)). a^16 + a^4 + 1 = 0 a^4 = -a^16 - 1 a^4 = -a^1
-  - 1 = a + 1 (= 0011b in coefficient representation).
-
   for each bit in `number` which is higher or equal
   to the highest bit position in the primitive polynomial,
   add the value of alpha to the output.
   */
   for (int i = 1023; i >= GF_m; i--) {
-    if (vector_coefficients[i]) {
+    if (primitive_ele_coeff[i]) {
       // add the value of the primitive polynomial using some magic.
-      vector_coefficients = vector_coefficients ^ primPolyValue << (i - GF_m);
+      primitive_ele_coeff = primitive_ele_coeff ^ poly_coefficients
+                                                      << (i - GF_m);
     }
   }
-  return vector_coefficients;
+  // Return the simplified coefficients.
+  return primitive_ele_coeff;
 }
 
 std::bitset<1024> ExponentialToBinary(const std::bitset<1024> &primitivePoly,

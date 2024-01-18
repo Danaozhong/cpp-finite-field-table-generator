@@ -54,7 +54,5 @@ PRIVATE
   GTest::gtest_main
 )
 
-enable_testing()
-
-add_test(NAME galois_table_test
-  COMMAND $<TARGET_FILE:galois_table_test>)
+include(GoogleTest)
+gtest_discover_tests(galois_table_test)

@@ -2,64 +2,68 @@
 #include <stdexcept>
 
 namespace Galois {
-int GetGFExtendedExponent(const std::bitset<1024> &primitivePoly) {
+int get_polynomial_degree(const std::bitset<1024> &primitivePoly) {
   if (0 == primitivePoly.to_ulong()) {
     return 0;
   }
 
   // get highest bit position in the primitive polynomial
   std::bitset<1024> primPoly(primitivePoly);
-
   int GF_m = 0;
-
-  while (false == primPoly.none()) {
+  while (!primPoly.none()) {
     GF_m++;
     primPoly >>= 1;
   }
   return GF_m - 1;
 }
 
-/// @brief Evaluates a primitive polyonmial.
+/// @brief Evaluates a primitive polynomial.
 /// @param primitivePoly The polynomial coefficients.
-/// @param number The number to evaluate.
-/// @return The evaluated number.
-std::bitset<1024> ToBinary(std::bitset<1024> primitivePoly,
-                           std::bitset<1024> number) {
-  int GF_m = GetGFExtendedExponent(primitivePoly);
+/// @param x The vector representation of the coefficients, e.g. 3 = 0x11b =
+/// alpha + 1.
+/// @return The simplified vector coefficients.
+std::bitset<1024> simplify_coefficients(std::bitset<1024> primitivePoly,
+                                        std::bitset<1024> vector_coefficients) {
+  int GF_m = get_polynomial_degree(primitivePoly);
   std::bitset<1024> primPolyValue(primitivePoly);
-  primPolyValue[GF_m] = 0;
 
-  if (number.none()) {
-    return number;
+  if (vector_coefficients.none()) {
+    return vector_coefficients;
   }
 
   /*
+  Handle vector coefficients higher than the polynomial length.
+  For example, for a polynomial p(x) = x^4 + x + 1, a coefficient at index 4 (or
+  higher) can be simplified. An exponent of 4 = 1000b (component binary) should
+  be simplified to (0011b). This is because for a^4: a^4^4 + a^4 + 1 = 0
+  (because a^4 is a root of p(x)). a^16 + a^4 + 1 = 0 a^4 = -a^16 - 1 a^4 = -a^1
+  - 1 = a + 1 (= 0011b in coefficient representation).
+
   for each bit in `number` which is higher or equal
   to the highest bit position in the primitive polynomial,
   add the value of alpha to the output.
   */
   for (int i = 1023; i >= GF_m; i--) {
-    if (number[i]) {
-      // add the value of the primitive polynomial
-      number[i] = 0;
-      number = number ^ primPolyValue << (i - GF_m);
+    if (vector_coefficients[i]) {
+      // add the value of the primitive polynomial using some magic.
+      vector_coefficients = vector_coefficients ^ primPolyValue << (i - GF_m);
     }
   }
-  return number;
+  return vector_coefficients;
 }
 
 std::bitset<1024> ExponentialToBinary(const std::bitset<1024> &primitivePoly,
                                       int exponent) {
-  int GF_m = GetGFExtendedExponent(primitivePoly);
+  const int GF_m = get_polynomial_degree(primitivePoly);
   std::bitset<1024> number(0);
   if (exponent == -999) {
     // exp is minus INF - return 0
     return number;
   }
 
-  exponent %= ((int)std::pow(2.0, (double)GF_m) - 1);
+  exponent %= (2 << GF_m) - 1;
   number[exponent] = 1;
-  return ToBinary(primitivePoly, number);
+  return simplify_coefficients(primitivePoly, number);
 }
 
 int BinaryToExponential(const std::bitset<1024> &primitivePoly,
@@ -67,14 +71,12 @@ int BinaryToExponential(const std::bitset<1024> &primitivePoly,
   if (binary.none()) {
     return -999;
   }
-  // brute-force search the right exponential
-  std::bitset<1024> currentExponent(0);
+  // brute-force search the right exponential.
   for (int i = 0; i != 1023; i++) {
     if (binary == ExponentialToBinary(primitivePoly, i)) {
       return i;
     }
   }
-  // TODO: for some reasons, this throws if the polyomial is not of order 5.
   throw std::invalid_argument("polynomial exponent could not be determined");
 }
 
@@ -90,12 +92,12 @@ std::bitset<1024> GaloisNumber::GetNumber() const { return this->value; }
 
 int GaloisNumber::SetNumber(int value) {
   std::bitset<1024> number(value);
-  this->value = ToBinary(this->primitivePoly, number);
+  this->value = simplify_coefficients(this->primitivePoly, number);
   return 0;
 }
 
 int GaloisNumber::SetNumber(std::bitset<1024> number) {
-  this->value = ToBinary(this->primitivePoly, number);
+  this->value = simplify_coefficients(this->primitivePoly, number);
   return 0;
 }
 

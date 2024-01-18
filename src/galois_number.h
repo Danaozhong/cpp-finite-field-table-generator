@@ -10,7 +10,7 @@ namespace Galois {
 /// @brief Returns the exponent of the primitive polynomial.
 /// @param primitivePoly
 /// @return
-int GetGFExtendedExponent(const std::bitset<1024> &primitivePoly);
+int get_polynomial_degree(const std::bitset<1024> &primitivePoly);
 
 class GaloisNumber {
 private:

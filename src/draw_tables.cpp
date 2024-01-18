@@ -14,7 +14,7 @@ void DrawOperationTable(std::bitset<1024> primitivePoly, std::ostream &os,
   }
   os << "g(x)=";
   bool started = false;
-  for (int i = GetGFExtendedExponent(primitivePoly); i >= 0; i--) {
+  for (int i = get_polynomial_degree(primitivePoly); i >= 0; i--) {
     if (primitivePoly[i] == 0) {
       continue;
     }
@@ -31,7 +31,7 @@ void DrawOperationTable(std::bitset<1024> primitivePoly, std::ostream &os,
   GaloisNumber currentRow(primitivePoly);
 
   int tableSize = (int)std::pow(
-      2.0, static_cast<double>(GetGFExtendedExponent(primitivePoly)));
+      2.0, static_cast<double>(get_polynomial_degree(primitivePoly)));
 
   if (OPERATION_MULTIPLY == operation) {
     os << "*\t";

@@ -27,11 +27,6 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Install dependencies
-      run: |
-        sudo apt -y update
-        sudo apt -y install qgis-dev
-
     # Workaround for incompatible clang and libstc++ versions, see
     # <https://github.com/actions/runner-images/issues/8659> for more info.
     # The basic idea here is to remove g++ 13 and its C++ standard library
@@ -59,5 +54,5 @@ jobs:
 
     - uses: actions/upload-artifact@v3
       with:
-        name: qgis-plugin-windows-linux-${{ matrix.c_compiler }}-${{ matrix.build_type }}
+        name: galois-cli-linux-${{ matrix.c_compiler }}-${{ matrix.build_type }}
         path: ${{ github.workspace }}/**/GaloisTableGenerator
